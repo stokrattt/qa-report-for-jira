@@ -1,0 +1,67 @@
+{
+    "manifest_version": 3,
+    "name": "QA Report for Jira",
+    "short_name": "QA Report",
+    "version": "1.0.0",
+    "description": "File a bug to Jira Cloud with an annotated screenshot, console errors, network log and screen video.",
+    "minimum_chrome_version": "116",
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "QA Report: capture a bug",
+        "default_icon": {
+            "16": "icons/icon-16.png",
+            "32": "icons/icon-32.png",
+            "48": "icons/icon-48.png"
+        }
+    },
+    "icons": {
+        "16": "icons/icon-16.png",
+        "32": "icons/icon-32.png",
+        "48": "icons/icon-48.png",
+        "128": "icons/icon-128.png"
+    },
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "options_page": "options.html",
+    "commands": {
+        "focus-capture": {
+            "suggested_key": {
+                "default": "Alt+Shift+B"
+            },
+            "description": "Bring the open capture window to the front"
+        }
+    },
+    "permissions": [
+        "storage",
+        "webRequest",
+        "debugger"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "console-hook.js"
+            ],
+            "run_at": "document_start",
+            "all_frames": true,
+            "world": "MAIN"
+        },
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_start",
+            "all_frames": true
+        }
+    ]
+}

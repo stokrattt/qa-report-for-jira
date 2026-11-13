@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="Connect QA Report to your Jira Cloud site and set the defaults for new bugs." />
+        <title>QA Report settings</title>
+        <link rel="stylesheet" href="ui.css" />
+    </head>
+    <body>
+        <header class="bar">
+            <span class="wordmark">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <circle class="dot" cx="12" cy="12" r="3.5" />
+                </svg>
+                QA Report
+            </span>
+            <span class="bar__title">Settings</span>
+            <div class="bar__end">
+                <button type="button" class="icon-btn" id="themeToggle" aria-label="Switch theme">
+                    <svg class="when-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z" /></svg>
+                    <svg class="when-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="page">
+            <div>
+                <h1>Connect Jira</h1>
+                <p class="page__lead">Three things and QA Report can file bugs to your Jira Cloud site.</p>
+            </div>
+
+            <form id="connectForm" novalidate>
+                <ol class="steps">
+                    <li>
+                        <div class="step__body">
+                            <h2>Your Jira site</h2>
+                            <div class="field">
+                                <label for="site">Site address</label>
+                                <input id="site" class="input input--mono" name="site" type="text" inputmode="url" autocomplete="url" placeholder="your-team.atlassian.net" spellcheck="false" />
+                                <p class="hint" id="siteHint">The address you open Jira at.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step__body">
+                            <h2>Your account</h2>
+                            <div class="field">
+                                <label for="email">Atlassian email</label>
+                                <input id="email" class="input" name="email" type="email" autocomplete="email" spellcheck="false" />
+                            </div>
+                            <div class="field">
+                                <label for="token">API token</label>
+                                <input id="token" class="input input--mono" name="token" type="password" autocomplete="off" spellcheck="false" />
+                                <p class="hint">
+                                    <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" rel="noopener">Create a token</a> on your Atlassian account page, then paste it here.
+                                </p>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step__body">
+                            <h2>Check and save</h2>
+                            <p>QA Report signs in once to make sure the three values work.</p>
+                            <div class="actions">
+                                <button type="submit" class="btn btn--primary" id="connect">Connect</button>
+                                <button type="button" class="btn btn--quiet" id="disconnect" hidden>Disconnect</button>
+                            </div>
+                            <p class="notice" id="connectResult" role="status" aria-live="polite" hidden></p>
+                        </div>
+                    </li>
+                </ol>
+            </form>
+
+            <section class="panel" aria-labelledby="defaultsTitle">
+                <div class="panel__head">
+                    <h2 id="defaultsTitle">New bugs</h2>
+                    <span class="count" id="defaultsSaved" role="status" aria-live="polite"></span>
+                </div>
+                <div class="panel__body">
+                    <div class="field">
+                        <label for="defaultLabels">Labels for every new bug</label>
+                        <input id="defaultLabels" class="input input--mono" name="defaultLabels" type="text" autocomplete="off" placeholder="from-qa-report" spellcheck="false" />
+                        <p class="hint">Space or comma separated. Leave empty for none.</p>
+                    </div>
+                    <p class="hint">Projects, issue types and fields come from your Jira. Values you pick under More fields are remembered per project.</p>
+                    <dl class="dl">
+                        <dt>Reopen the capture window</dt>
+                        <dd><kbd class="measured" id="shortcut">Alt+Shift+B</kbd> <button type="button" class="btn btn--quiet" id="changeShortcut">Change</button></dd>
+                    </dl>
+                </div>
+            </section>
+
+            <section class="panel" id="template" aria-labelledby="templateTitle">
+                <div class="panel__head">
+                    <h2 id="templateTitle">Test report template</h2>
+                    <span class="count" id="templateSaved" role="status" aria-live="polite"></span>
+                </div>
+                <div class="panel__body">
+                    <p class="hint">What Post test report asks for and how the Jira comment looks. Short fields go into a table, long ones get a heading.</p>
+                    <div class="row">
+                        <div class="field">
+                            <label for="tplHeading">Comment heading</label>
+                            <input id="tplHeading" class="input" type="text" autocomplete="off" />
+                        </div>
+                        <div class="field">
+                            <label for="tplResultLabel">Result field name</label>
+                            <input id="tplResultLabel" class="input" type="text" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <span class="field__label" id="tplResultsLabel">Result options</span>
+                        <div class="tpl-list" id="tplResults" aria-labelledby="tplResultsLabel"></div>
+                        <div class="actions"><button type="button" class="btn" id="tplAddResult">Add result</button></div>
+                    </div>
+                    <div class="field">
+                        <span class="field__label" id="tplFieldsLabel">Fields</span>
+                        <div class="tpl-list" id="tplFields" aria-labelledby="tplFieldsLabel"></div>
+                        <div class="actions">
+                            <button type="button" class="btn" id="tplAddField">Add field</button>
+                            <button type="button" class="btn btn--quiet" id="tplReset">Reset to default</button>
+                        </div>
+                    </div>
+                    <p class="notice notice--bad" id="templateError" hidden></p>
+                </div>
+            </section>
+
+            <section class="panel" aria-labelledby="teamTitle">
+                <div class="panel__head"><h2 id="teamTitle">Share with your team</h2></div>
+                <div class="panel__body">
+                    <p class="hint">Export the labels and the report template to a file and send it to your team. Each person imports it here, then connects with their own token. The file holds no site, email or token.</p>
+                    <div class="actions">
+                        <button type="button" class="btn" id="exportSettings">Export settings</button>
+                        <button type="button" class="btn" id="importSettings">Import settings</button>
+                        <input type="file" id="importFile" accept="application/json,.json" hidden />
+                    </div>
+                    <p class="notice" id="teamResult" role="status" aria-live="polite" hidden></p>
+                </div>
+            </section>
+
+            <p class="hint">Your token stays in this browser profile and goes only to your Jira site. QA Report has no server and collects nothing.</p>
+        </main>
+        <script src="theme.js" type="module"></script>
+        <script src="options.js" type="module"></script>
+    </body>
+</html>

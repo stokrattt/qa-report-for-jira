@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="Review the captured screenshot, logs and video, then file the bug to Jira." />
+        <title>New bug report</title>
+        <link rel="stylesheet" href="ui.css" />
+    </head>
+    <body>
+        <header class="bar">
+            <span class="wordmark">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <circle class="dot" cx="12" cy="12" r="3.5" />
+                </svg>
+                QA Report
+            </span>
+            <div class="destination" aria-label="Where the issue goes">
+                <label class="visually-hidden" for="project">Project</label>
+                <select id="project" class="select" disabled></select>
+                <label class="visually-hidden" for="issueType">Issue type</label>
+                <select id="issueType" class="select" disabled></select>
+            </div>
+            <div class="bar__end">
+                <button type="button" class="icon-btn" id="themeToggle" aria-label="Switch theme">
+                    <svg class="when-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z" /></svg>
+                    <svg class="when-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+                </button>
+                <button type="button" class="btn btn--quiet" id="cancel">Cancel</button>
+                <button type="button" class="btn btn--primary" id="create" disabled>Create issue</button>
+            </div>
+        </header>
+
+        <h1 class="visually-hidden">New bug report</h1>
+
+        <main class="capture">
+            <section class="capture__evidence" aria-label="Captured evidence">
+                <div class="panel">
+                    <div class="toolbar" role="toolbar" aria-label="Annotate screenshot">
+                        <button type="button" class="btn tool" data-tool="pen" aria-pressed="true">Pen</button>
+                        <button type="button" class="btn tool" data-tool="rect" aria-pressed="false">Box</button>
+                        <button type="button" class="btn tool" data-tool="arrow" aria-pressed="false">Arrow</button>
+                        <input type="color" id="drawColor" class="swatch" value="#ff3b30" aria-label="Pen colour" />
+                        <span class="toolbar__sep" aria-hidden="true"></span>
+                        <button type="button" class="btn btn--quiet" id="undoDraw">Undo</button>
+                        <button type="button" class="btn btn--quiet" id="clearDraw">Clear</button>
+                        <button type="button" class="btn btn--quiet toolbar__end" id="removeScreenshot">Remove screenshot</button>
+                    </div>
+                    <div class="shot" id="shot">
+                        <canvas id="screenshotCanvas" aria-label="Screenshot of the page, draw on it to annotate"></canvas>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <details class="disclosure" id="consoleDetails">
+                        <summary>Console errors <span class="count" id="consoleCount">0</span></summary>
+                        <pre class="log" id="consoleLog"></pre>
+                    </details>
+                    <details class="disclosure" id="networkDetails" hidden>
+                        <summary>Network requests <span class="count" id="networkCount">0</span></summary>
+                        <pre class="log" id="networkLog"></pre>
+                    </details>
+                </div>
+                <div class="notice" id="harStatus" hidden></div>
+
+                <div class="panel" id="videoCard" hidden>
+                    <div class="panel__head">
+                        <h2>Video</h2>
+                        <div class="bar__end">
+                            <button type="button" class="btn" id="startVideo">Start recording</button>
+                            <button type="button" class="btn" id="stopVideo" disabled>Stop</button>
+                        </div>
+                    </div>
+                    <div class="panel__body">
+                        <div class="notice" id="videoStatus" hidden></div>
+                        <div class="clips" id="videoList"></div>
+                        <p class="hint">Pick a tab, window or screen, then drag over the part to record. Stops on its own after 2 minutes.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="capture__form" aria-label="Issue details">
+                <div class="notice notice--bad" id="setupNotice" hidden>
+                    QA Report is not connected to Jira yet. <a href="options.html" target="_blank">Open settings</a>, then reopen this window.
+                </div>
+                <div class="field">
+                    <label for="summary">Summary <span class="req" aria-hidden="true">*</span></label>
+                    <input id="summary" class="input" type="text" name="summary" autocomplete="off" required />
+                </div>
+                <div class="field">
+                    <label id="stepsLabel" for="steps">Steps to reproduce</label>
+                    <div id="steps" aria-labelledby="stepsLabel" class="rich-field" contenteditable="true" role="textbox" aria-multiline="true"></div>
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label id="actualLabel" for="actual">Actual result</label>
+                        <div id="actual" aria-labelledby="actualLabel" class="rich-field" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="What happened"></div>
+                    </div>
+                    <div class="field">
+                        <label id="expectedLabel" for="expected">Expected result</label>
+                        <div id="expected" aria-labelledby="expectedLabel" class="rich-field" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="What should have happened"></div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label id="contextLabel" for="context">Context</label>
+                    <div id="context" aria-labelledby="contextLabel" class="rich-field" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Optional: who is affected, since when, related issues"></div>
+                </div>
+                <div class="field">
+                    <label id="notesLabel" for="notes">Notes</label>
+                    <div id="notes" aria-labelledby="notesLabel" class="rich-field" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Optional"></div>
+                    <p class="hint">Paste a screenshot into any of these fields with Ctrl+V or ⌘V to place it inline.</p>
+                </div>
+
+                <div class="row">
+                    <div class="field" id="priorityField" hidden>
+                        <label for="priority">Priority</label>
+                        <select id="priority" class="select"></select>
+                    </div>
+                    <div class="field">
+                        <label for="pageUrl">Page</label>
+                        <input id="pageUrl" class="input input--mono" type="url" name="pageUrl" autocomplete="off" />
+                    </div>
+                </div>
+
+                <div id="extraFields" class="row"></div>
+                <details class="disclosure panel" id="moreFields" hidden>
+                    <summary>More fields <span class="count" id="moreCount">0</span></summary>
+                    <div class="panel__body">
+                        <div id="optionalFields" class="row"></div>
+                        <p class="hint">Optional fields from your Jira. What you pick here is remembered for this project.</p>
+                    </div>
+                </details>
+                <p class="status" id="status" role="status" aria-live="polite"></p>
+            </section>
+        </main>
+
+        <div class="overlay" id="areaOverlay" role="dialog" aria-modal="true" aria-labelledby="areaHint">
+            <p id="areaHint">Drag over the part to record, or use the full frame.</p>
+            <div class="overlay__stage">
+                <video id="areaVideo" autoplay muted></video>
+                <div class="overlay__box" id="areaBox"></div>
+            </div>
+            <div class="overlay__actions">
+                <button type="button" class="btn" id="areaFull">Use full frame</button>
+                <button type="button" class="btn" id="areaConfirm" disabled>Record this area</button>
+                <button type="button" class="btn btn--quiet" id="areaCancel">Cancel</button>
+            </div>
+        </div>
+
+        <script src="theme.js" type="module"></script>
+        <script src="capture.js" type="module"></script>
+    </body>
+</html>

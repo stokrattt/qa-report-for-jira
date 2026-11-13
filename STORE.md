@@ -1,0 +1,84 @@
+# Chrome Web Store listing
+
+Paste-ready text for the developer dashboard.
+
+## Store listing
+
+**Name:** QA Report for Jira
+
+**Summary (132 characters max):**
+
+File bugs to Jira Cloud with an annotated screenshot, console errors, network log and screen video in one window.
+
+**Category:** Developer Tools
+
+**Language:** English
+
+**Description:**
+
+QA Report turns "it's broken" into a Jira issue someone can act on.
+
+Click the toolbar icon on the page with the bug. QA Report takes a screenshot and collects the console errors the page has logged since it loaded. A window opens where you mark up the screenshot, write the steps, actual and expected result, and pick the project and issue type. Click Create issue and it is in Jira, with everything attached.
+
+What a bug report can include:
+- An annotated screenshot (pen, box, arrow)
+- Console errors and failed resource loads, including from iframes
+- A list of recent network requests, or a full HAR recording while you reproduce the bug
+- Screen video clips, cropped to the area that matters, shown inline in the issue
+- Screenshots pasted straight into the steps or results
+- The page URL, browser and viewport size
+
+It fits your Jira: projects, issue types, priorities and every required field come from your own Jira configuration, and the optional fields you pick are remembered per project.
+
+It also posts test reports: a comment on an issue with the result, your fields and evidence files. Your team defines the template (heading, result options, fields) once and shares it as a settings file.
+
+Private by design: your API token stays in your browser and is sent only to your Jira site. No server, no analytics, no tracking.
+
+Works with Jira Cloud (atlassian.net). Needs an Atlassian API token.
+
+QA Report is not affiliated with or endorsed by Atlassian. Jira is a trademark of Atlassian.
+
+## Privacy practices tab
+
+**Single purpose:** Capture evidence of a software bug on the current page and file it to the user's own Jira Cloud site.
+
+**Permission justifications:**
+
+| Permission | Justification |
+| --- | --- |
+| `storage` | Saves the user's Jira site, email and API token locally, plus preferences and the current bug draft. |
+| `webRequest` | Keeps a short in-memory list of the tab's recent requests (method, status, URL) for the bug report, and reads the redirect target of a Jira attachment to show uploaded images and videos inline in the issue. Requests are observed only, never blocked or changed. |
+| `debugger` | Records the full network traffic of one tab as a HAR file, only when the user ticks "Record network traffic", until the issue is created. |
+| Host permission `<all_urls>` | The content script captures console errors on any page the user may need to report a bug from, from the moment the page loads, which is before the user knows there is a bug. The extension also calls the Jira site the user entered, which can be any Jira Cloud address. |
+| Remote code | No. All code ships in the package. |
+
+**Data usage (tick these):**
+
+- Authentication information: the Jira API token, stored locally, sent only to the user's Jira site.
+- Website content: screenshots, console messages and network data of the page the user reports, sent only to the user's Jira site when they create an issue.
+- Personally identifiable information: the user's email, sent only to their Jira site to sign in.
+
+Certify: not sold to third parties, not used for purposes unrelated to the single purpose, not used for creditworthiness or lending.
+
+**Privacy policy URL:** https://github.com/stokrattt/qa-report-for-jira/blob/main/PRIVACY.md
+
+**Support email:** stokratt@gmail.com
+
+## Images to upload
+
+| Asset | Size | What to show |
+| --- | --- | --- |
+| Icon | 128 x 128 | `icons/icon-128.png` |
+| Screenshot 1 | 1280 x 800 | `docs/screenshots/capture-dark.png` (2560 x 1600, Chrome accepts it scaled) |
+| Screenshot 2 | 1280 x 800 | `docs/screenshots/report-dark.png` |
+| Screenshot 3 | 1280 x 800 | `docs/screenshots/capture-light.png` |
+| Screenshot 4 | 1280 x 800 | The created issue in your demo Jira, with the panels and an inline video |
+| Small promo tile (optional) | 440 x 280 | The icon and the name on the graphite background |
+
+Take the screenshots on a demo Jira site and a demo page, not on real work data.
+
+## Before you submit
+
+1. Bump `version` in `manifest.json` for every upload.
+2. Run `npm test`, then `npm run zip`, and upload `qa-report-for-jira.zip`.
+3. Expect a longer review: `debugger` and `<all_urls>` trigger manual review. The justifications above answer what reviewers ask.
