@@ -66,16 +66,16 @@ Certify: not sold to third parties, not used for purposes unrelated to the singl
 
 ## Images to upload
 
-| Asset | Size | What to show |
-| --- | --- | --- |
-| Icon | 128 x 128 | `icons/icon-128.png` |
-| Screenshot 1 | 1280 x 800 | `docs/screenshots/capture-dark.png` (2560 x 1600, Chrome accepts it scaled) |
-| Screenshot 2 | 1280 x 800 | `docs/screenshots/report-dark.png` |
-| Screenshot 3 | 1280 x 800 | `docs/screenshots/capture-light.png` |
-| Screenshot 4 | 1280 x 800 | The created issue in your demo Jira, with the panels and an inline video |
-| Small promo tile (optional) | 440 x 280 | The icon and the name on the graphite background |
+All ready in `docs/store/`, at the exact sizes the store accepts.
 
-Take the screenshots on a demo Jira site and a demo page, not on real work data.
+| Asset | Size | File |
+| --- | --- | --- |
+| Store icon | 128 x 128 | `icons/icon-128.png` |
+| Screenshot 1 | 1280 x 800 | `docs/store/screenshot-1-capture-dark.png` |
+| Screenshot 2 | 1280 x 800 | `docs/store/screenshot-2-report-dark.png` |
+| Screenshot 3 | 1280 x 800 | `docs/store/screenshot-3-template-editor.png` |
+| Screenshot 4 | 1280 x 800 | `docs/store/screenshot-4-capture-light.png` |
+| Small promo tile | 440 x 280 | `docs/store/promo-small-440x280.png` |
 
 ## Before you submit
 
