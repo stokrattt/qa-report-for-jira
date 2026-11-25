@@ -53,7 +53,8 @@ export function buildAiPrompt({ issueKey, summary, tester, description, comments
     return `You fill a test report for Jira issue ${issueKey} "${summary}".
 Tester: ${tester || 'unknown'}. Their comments say what was actually tested, so they weigh most.
 Later comments override the description. Read each field's name as what it asks for,
-for example "What was checked" = which requirements were verified, "Notes" = how, as a short checklist.
+for example "What was checked" = which requirements were verified, "Notes" = how, as a short checklist of steps or cases.
+Do not list the environment, URL or tester: the report has separate fields for them.
 
 Return ONLY a JSON object with exactly these keys, no markdown fence:
 ${JSON.stringify(shape)}
