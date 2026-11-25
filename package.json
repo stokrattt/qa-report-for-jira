@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "node jira.test.mjs && node har.test.mjs && node rich-field.test.mjs",
+        "test": "node jira.test.mjs && node har.test.mjs && node rich-field.test.mjs && node ai-fill.test.mjs",
         "zip": "rm -f qa-report-for-jira.zip && zip -r qa-report-for-jira.zip manifest.json *.html *.css *.js icons/*.png -x '*.test.mjs'"
     }
 }

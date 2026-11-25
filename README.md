@@ -94,10 +94,29 @@ Video is H.264 MP4 at about 4 Mbit/s, so a full 2-minute 1080p clip is about 57 
 
 1. Open the Jira issue you tested, or the app you tested it in.
 2. Click the extension icon, then **Post test report**.
-3. Pick the result and fill in the fields. Add evidence files: drop, choose or paste them.
+3. Pick the result and fill in the fields, or click **Fill with AI**. Add evidence files: drop, choose or paste them.
 4. Click **Post comment**. The issue opens scrolled to the new comment.
 
-The form keeps a draft while you type.
+Typed in by hand, the issue loads when you press Enter or leave the field. The form keeps a draft while you type.
+
+### Fill with AI
+
+**Fill with AI** reads the issue description and its comments and writes the template's long text
+and issue list fields, for example what was checked and how. The tester's own comments weigh most,
+and later comments override the description. Read the result before you post it.
+
+It uses Claude Code or Codex on your computer, with the account the CLI is logged in to, so it runs
+on your Claude or ChatGPT plan and needs no API key. One-time setup, on Windows, macOS or Linux:
+
+1. Install one CLI and log in: `npm i -g @anthropic-ai/claude-code && claude`, or
+   `npm i -g @openai/codex && codex login`.
+2. Install [Node.js](https://nodejs.org) if you do not have it, then click **Fill with AI** and allow the permission Chrome asks for.
+3. The form shows a command with your extension id, for PowerShell on Windows or Terminal elsewhere. Copy it, run it, and click
+   **Fill with AI** again. The command saves a small bridge script to `~/.qa-report-for-jira`
+   (`%LOCALAPPDATA%\qa-report-for-jira` on Windows) and registers it with Chrome.
+
+Settings picks which CLI to use. The CLI runs in an empty folder with no tools, so it only reads
+the issue text the extension passes to it.
 
 ![Test report](docs/screenshots/report-dark.png)
 
@@ -135,10 +154,13 @@ Empty fields are left out of the comment. **Reset to default** brings back the o
 | QA Report cannot fill this field type | Your Jira requires a field of a type the extension does not support. Ask your Jira admin to give it a default value or make it optional for this issue type. |
 | Network recording skipped | Close DevTools on that tab and capture again. |
 | Chrome does not allow capturing this page | Chrome blocks extensions on `chrome://` pages and the Chrome Web Store. |
+| Fill with AI is not connected to this computer yet | Follow the steps in the message: install a CLI, run the shown command, click again. |
+| claude or codex not found on PATH | Install the CLI, then run the setup command again so the bridge sees it. |
+| claude failed / codex failed | Run `claude` or `codex` in Terminal or PowerShell once and check it is logged in and up to date. |
 
 ## Privacy
 
-Your API token is kept in `chrome.storage.local` in this browser profile and is sent only to your Jira site. The extension has no server, no analytics and no tracking. See [PRIVACY.md](PRIVACY.md).
+Your API token is kept in `chrome.storage.local` in this browser profile and is sent only to your Jira site. The extension has no server, no analytics and no tracking. **Fill with AI** passes the issue text to the Claude Code or Codex CLI on your computer, which sends it to Anthropic or OpenAI under your own account. See [PRIVACY.md](PRIVACY.md).
 
 ## Development
 

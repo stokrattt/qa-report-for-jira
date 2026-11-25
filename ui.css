@@ -214,6 +214,7 @@ details.disclosure + details.disclosure { border-top: var(--rule-hair) solid var
 .status { font-size: var(--text-sm); color: var(--color-muted); min-height: 1lh; }
 .status--bad { color: var(--color-bad); }
 .status--ok { color: var(--color-ok); }
+#aiStatus { white-space: pre-line; }
 
 /* ---------- settings ---------- */
 .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: step; }

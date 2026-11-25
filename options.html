@@ -123,6 +123,15 @@
                         </div>
                     </div>
                     <p class="notice notice--bad" id="templateError" hidden></p>
+                    <div class="field">
+                        <label for="aiEngine">Fill with AI uses</label>
+                        <select id="aiEngine" class="select">
+                            <option value="auto">Claude Code, or Codex if Claude Code is not installed</option>
+                            <option value="claude">Claude Code</option>
+                            <option value="codex">Codex</option>
+                        </select>
+                        <p class="hint">The CLI on this computer, with the account it is logged in to. No API key needed.</p>
+                    </div>
                 </div>
             </section>
 

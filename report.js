@@ -9,6 +9,7 @@ import {
     uploadAttachment,
     mapLimit,
 } from './jira.js';
+import { NATIVE_HOST, AI_KINDS, installCommand, adfToText, buildAiPrompt, parseAiReply } from './ai-fill.js';
 
 // Text is kept as a draft; File objects cannot go into chrome.storage, so files are re-added.
 const DRAFT_KEY = 'testReportDraft';
@@ -58,9 +59,13 @@ function renderTemplate() {
     });
 }
 
+// Enter and leaving the field both fire, so a key already loaded is skipped.
+let loadedKey = '';
+
 async function loadIssue() {
     const key = el.issueKey.value.trim().toUpperCase();
-    if (!key) return;
+    if (!key || key === loadedKey) return;
+    loadedKey = key;
     el.issueKey.value = key;
     setStatus(`Loading ${key}...`);
     try {
@@ -69,6 +74,7 @@ async function loadIssue() {
         setStatus('');
         saveDraft();
     } catch (err) {
+        loadedKey = '';
         setStatus(String(err.message ?? err), 'bad');
     }
 }
@@ -198,8 +204,107 @@ async function init() {
 }
 
 document.addEventListener('input', saveDraft);
-$('load').addEventListener('click', loadIssue);
+el.issueKey.addEventListener('change', loadIssue);
 el.issueKey.addEventListener('keydown', (e) => e.key === 'Enter' && loadIssue());
+
+// ---------------------------------------------------------------------------
+// Fill with AI: the local claude / codex CLI writes the long template fields
+// ---------------------------------------------------------------------------
+
+const IS_WINDOWS = /^win/i.test(navigator.userAgentData?.platform ?? navigator.platform);
+const SHELL = IS_WINDOWS ? 'PowerShell' : 'Terminal';
+const CLI_STEP =
+    '1. Install Claude Code or Codex and log in once:\n' +
+    '   npm i -g @anthropic-ai/claude-code, then run: claude\n' +
+    '   or: npm i -g @openai/codex, then run: codex login';
+
+function setAi(text, kind = '', command = '') {
+    $('aiStatus').textContent = text;
+    $('aiStatus').className = `status${kind ? ` status--${kind}` : ''}`;
+    $('aiCmdRow').hidden = !command;
+    $('aiCmd').value = command;
+}
+
+function aiSetupError(reply) {
+    const cmd = installCommand(chrome.runtime.id, IS_WINDOWS);
+    if (!reply) {
+        return [`Fill with AI is not connected to this computer yet (one-time setup).\n${CLI_STEP}\n2. Copy this, run it in ${SHELL}, then click Fill with AI again:`, cmd];
+    }
+    if (reply.code === 'NO_ENGINE') {
+        return [`${reply.error}.\n${CLI_STEP}\n2. Run this in ${SHELL} again, then click Fill with AI:`, cmd];
+    }
+    if (reply.code === 'CLI_FAILED') {
+        return [`${reply.engine} failed. Open ${SHELL} and run "${reply.engine}" to check you are logged in.\n${reply.error}`, ''];
+    }
+    return [reply.error ?? 'The AI bridge gave no answer.', ''];
+}
+
+// Fetched on click: a restored draft never loaded the issue, and the newest comment counts.
+async function issueContext(key) {
+    const [{ fields }, { comments }] = await Promise.all([
+        jiraGet(`/issue/${encodeURIComponent(key)}?fields=summary,description`),
+        jiraGet(`/issue/${encodeURIComponent(key)}/comment?orderBy=-created&maxResults=100`),
+    ]);
+    return {
+        issueKey: key,
+        summary: fields.summary ?? '',
+        description: adfToText(fields.description),
+        comments: comments.reverse().map((c) => ({ author: c.author?.displayName ?? '?', created: c.created, text: adfToText(c.body) })),
+    };
+}
+
+$('aiCopy').addEventListener('click', async () => {
+    await navigator.clipboard.writeText($('aiCmd').value);
+    $('aiCopy').textContent = 'Copied';
+    setTimeout(() => ($('aiCopy').textContent = 'Copy'), 1500);
+});
+
+$('aiFill').addEventListener('click', async () => {
+    // permissions.request needs this click's user gesture, so it runs before anything else awaits.
+    // Optional, so the store update does not disable the extension for people who never use AI.
+    const granted = await chrome.permissions.request({ permissions: ['nativeMessaging'] }).catch(() => false);
+    if (!granted) return setAi('Fill with AI needs permission to talk to apps on this computer. Click it again and allow.', 'bad');
+    if (!chrome.runtime.sendNativeMessage) return setAi('Permission granted. Reload this window, then click Fill with AI again.', 'bad');
+
+    if (!template) return setAi('Connect Jira in Settings first.', 'bad');
+    const key = el.issueKey.value.trim().toUpperCase();
+    if (!key) return setAi('Enter the issue key first.', 'bad');
+    const targets = template.fields.map((f, i) => ({ ...f, input: valueInputs[i] })).filter((f) => AI_KINDS.has(f.kind));
+    if (!targets.length) return setAi('Your report template has no long text or issue list field to fill.', 'bad');
+    const edited = targets.some((t) => t.input.value.trim() && t.input.value.trim() !== t.default.trim());
+    if (edited && !confirm(`Replace ${targets.map((t) => t.label).join(', ')}?`)) return;
+
+    const btn = $('aiFill');
+    btn.disabled = true;
+    btn.setAttribute('aria-busy', 'true');
+    try {
+        setAi(`Reading ${key}…`);
+        await loadIssue();
+        const meIndex = template.fields.findIndex((f) => f.kind === 'me');
+        const prompt = buildAiPrompt({
+            ...(await issueContext(key)),
+            tester: meIndex === -1 ? '' : valueInputs[meIndex].value.trim(),
+            fields: targets.map(({ label, kind }) => ({ label, kind })),
+        });
+        const { aiEngine = 'auto' } = await chrome.storage.sync.get('aiEngine');
+        setAi(`Asking ${aiEngine === 'auto' ? 'Claude Code or Codex' : aiEngine}, this takes up to a minute…`);
+        // A failed call here means the bridge is not installed, or installed for another extension id.
+        const reply = await chrome.runtime.sendNativeMessage(NATIVE_HOST, { engine: aiEngine, prompt }).catch(() => null);
+        if (!reply?.ok) {
+            const [text, command] = aiSetupError(reply);
+            return setAi(text, 'bad', command);
+        }
+        const values = parseAiReply(reply.text, targets.map((t) => t.label));
+        for (const t of targets) if (t.label in values) t.input.value = values[t.label];
+        saveDraft();
+        setAi(`Filled by ${reply.engine}. Read it before posting.`, 'ok');
+    } catch (err) {
+        setAi(String(err.message ?? err), 'bad');
+    } finally {
+        btn.disabled = false;
+        btn.removeAttribute('aria-busy');
+    }
+});
 
 $('pickFiles').addEventListener('click', () => $('fileInput').click());
 $('fileInput').addEventListener('change', () => {

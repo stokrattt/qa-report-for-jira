@@ -100,6 +100,12 @@ for (const key of DEFAULT_KEYS) {
     });
 }
 
+chrome.storage.sync.get('aiEngine').then(({ aiEngine }) => ($('aiEngine').value = aiEngine ?? 'auto'));
+$('aiEngine').addEventListener('change', async () => {
+    await chrome.storage.sync.set({ aiEngine: $('aiEngine').value });
+    flashSaved('templateSaved');
+});
+
 // ---------------------------------------------------------------------------
 // Test report template editor: edits `template` in place and saves on every change
 // ---------------------------------------------------------------------------

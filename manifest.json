@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "QA Report for Jira",
     "short_name": "QA Report",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "File a bug to Jira Cloud with an annotated screenshot, console errors, network log and screen video.",
     "minimum_chrome_version": "116",
     "action": {
@@ -37,6 +37,9 @@
         "storage",
         "webRequest",
         "debugger"
+    ],
+    "optional_permissions": [
+        "nativeMessaging"
     ],
     "host_permissions": [
         "<all_urls>"

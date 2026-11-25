@@ -1,6 +1,6 @@
 # Privacy policy for QA Report for Jira
 
-Last updated: 12 November 2026
+Last updated: 25 November 2026
 
 QA Report for Jira ("QA Report") is a Chrome extension that creates Jira issues and comments on your behalf. This page says what it handles and where that goes.
 
@@ -25,7 +25,9 @@ In-memory data is dropped when the tab closes or the extension restarts.
 
 ## Where data goes
 
-Data goes to one place: the Jira Cloud site you entered, through Atlassian's REST API, when you click "Create issue" or "Post comment". QA Report sends nothing to its authors or to any third party. It has no server, no analytics, no ads and no tracking. Atlassian handles the data you send to your Jira site under your organisation's agreement with Atlassian.
+Data goes to the Jira Cloud site you entered, through Atlassian's REST API, when you click "Create issue" or "Post comment". QA Report sends nothing to its authors or to any third party. It has no server, no analytics, no ads and no tracking. Atlassian handles the data you send to your Jira site under your organisation's agreement with Atlassian.
+
+One exception, only when you click **Fill with AI** in a test report: QA Report reads the issue's description and comments from your Jira site and passes them, with the names of your report fields, to the Claude Code or Codex command-line tool installed on your computer, through Chrome's native messaging. That tool sends the text to Anthropic or OpenAI under the account you logged it in with, and their terms for that account apply. QA Report does not send it anywhere else, and the button asks Chrome for the "nativeMessaging" permission only on first use.
 
 Review the screenshot, logs and HAR before you create an issue: they can contain whatever the page showed or sent, including personal data or session tokens. You can remove the screenshot, and you can leave network recording off.
 
