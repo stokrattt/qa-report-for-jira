@@ -35,7 +35,9 @@ const MAX_COMMENTS_CHARS = 40_000;
 
 const FIELD_GUIDE = {
     long: 'short plain text, 2-7 lines, each "- ..." when it is a list',
-    issues: 'one bug per line as "KEY summary", only bugs the comments name; empty string if none',
+    issues:
+        'bugs or defects the comments report as found, one per line: "KEY summary" when a bug issue is linked, else the short summary; ' +
+        'leave out bugs a later comment says are fixed; empty string if none; a bug listed here is not repeated in other fields',
 };
 
 // fields: [{ label, kind }] of the template fields the AI fills.
